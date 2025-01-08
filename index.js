@@ -1,7 +1,7 @@
 import { createServer } from "http";
 import guitars from "./data.js";
 import { URL } from "url";
-import { createList, getGuitarContent } from "./content.js";
+import { createList, getGuitarContent, View } from "./content.js";
 
 const server = createServer((request, response) => {
   const parts = request.url.split("/");
@@ -11,23 +11,25 @@ const server = createServer((request, response) => {
   } else {
     const url = new URL(request.url, "http://localhost:8210");
     const id = url.searchParams.get("id");
+    if(parts.includes('add')){
+      content=getForm()
+    }
+    else if(id){
+      let guitar = guitars.find((g) => g.id == id);
+      content=getGuitarContent(guitar);
 
-    let content = `<!DOCTYPE html>
-  <html lang="en">
-  <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Guitar Info</title>
-  </head>
-  <body style="font-size:2rem">
-   
-  ${id ? getGuitarContent(id) : createList()}
-   
-  </body>
-  </html>`;
+    }
+
+    else{
+      content=createList(guitars);
+
+
+    }
+
+    let content = ``;
 
     response.writeHead(200, { "Content-Type": "text/html" });
-    response.end(content);
+    response.end(View(content));
   }
 });
 
